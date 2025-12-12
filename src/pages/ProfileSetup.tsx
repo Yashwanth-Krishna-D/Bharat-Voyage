@@ -164,11 +164,11 @@ const ProfileSetup: React.FC = () => {
 
       const location = selectedLocation
         ? {
-            label: selectedLocation.label,
-            displayName: selectedLocation.displayName,
-            lat: selectedLocation.lat,
-            lon: selectedLocation.lon,
-          }
+          label: selectedLocation.label,
+          displayName: selectedLocation.displayName,
+          lat: selectedLocation.lat,
+          lon: selectedLocation.lon,
+        }
         : null;
 
       const profileData: Record<string, any> = {
@@ -206,7 +206,7 @@ const ProfileSetup: React.FC = () => {
       )}
 
       <Grid container spacing={3}>
-        <Grid xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
             <Avatar src={photoPreview ?? undefined} sx={{ width: 120, height: 120 }}>
               {!photoPreview && name ? name.charAt(0).toUpperCase() : null}
@@ -223,17 +223,17 @@ const ProfileSetup: React.FC = () => {
           </Box>
         </Grid>
 
-        <Grid xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={2}>
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField label="Name" value={name} fullWidth onChange={(e) => setName(e.target.value)} />
             </Grid>
 
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField label="Email" value={email} fullWidth disabled />
             </Grid>
 
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Autocomplete<LocationOption, false, false, false>
                 options={locationOptions}
                 getOptionLabel={(o) => o.label}
@@ -249,11 +249,11 @@ const ProfileSetup: React.FC = () => {
               />
             </Grid>
 
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField label="Phone (optional)" value={phone} fullWidth onChange={(e) => setPhone(e.target.value)} />
             </Grid>
 
-            <Grid xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Box display="flex" gap={2} alignItems="center">
                 <Button variant="contained" onClick={handleSave} disabled={saving}>
                   {saving ? <CircularProgress size={18} /> : 'Save'}
