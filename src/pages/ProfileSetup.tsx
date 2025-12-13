@@ -11,13 +11,13 @@ import {
   Autocomplete,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import { onAuthStateChanged } from 'firebase/auth';
-import type { User } from 'firebase/auth';
-import { auth, db, storage } from '../firebase';
+import { db, storage } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import { doc, setDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 
 type LocationOption = {
   label: string;
@@ -29,7 +29,7 @@ type LocationOption = {
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<User | null>(null);
+  const { currentUser, loading: authLoading } = useAuth();
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
@@ -41,23 +41,20 @@ const ProfileSetup: React.FC = () => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-  const [saving, setSaving] = useState<boolean>(false);
+  const [savingStatus, setSavingStatus] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
   const [snackOpen, setSnackOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      if (!u) {
-        navigate('/', { replace: true });
-        return;
-      }
-      setUser(u);
-      setName(u.displayName || '');
-      setEmail(u.email || '');
-      setPhotoPreview(u.photoURL || null);
-    });
-    return () => unsub();
-  }, [navigate]);
+    if (authLoading) return;
+    if (!currentUser) {
+      navigate('/', { replace: true });
+      return;
+    }
+    setName(currentUser.displayName || '');
+    setEmail(currentUser.email || '');
+    setPhotoPreview(currentUser.photoURL || null);
+  }, [currentUser, authLoading, navigate]);
 
 
   useEffect(() => {
@@ -89,20 +86,26 @@ const ProfileSetup: React.FC = () => {
 
         const data = await res.json();
 
-        const mapped: LocationOption[] = (data || []).map((item: any) => {
+        const mapped: LocationOption[] = [];
+        const seen = new Set<string>();
+
+        (data || []).forEach((item: any) => {
           const address = item.address || {};
           const labelParts = [
             address.city || address.town || address.village || address.county || item.display_name.split(',')[0],
             address.state,
             address.country,
           ].filter(Boolean);
-
-          return {
-            label: labelParts.join(', '),
-            displayName: item.display_name,
-            lat: item.lat,
-            lon: item.lon,
-          };
+          const label = labelParts.join(', ');
+          if (!seen.has(label)) {
+            seen.add(label);
+            mapped.push({
+              label,
+              displayName: item.display_name,
+              lat: item.lat,
+              lon: item.lon,
+            });
+          }
         });
 
         setLocationOptions(mapped);
@@ -113,7 +116,7 @@ const ProfileSetup: React.FC = () => {
       }
     };
 
-    const timeout = setTimeout(fetchLocations, 350); // debounce
+    const timeout = setTimeout(fetchLocations, 350); 
     return () => {
       controller.abort();
       clearTimeout(timeout);
@@ -137,7 +140,7 @@ const ProfileSetup: React.FC = () => {
 
   const handleSave = async () => {
     setError('');
-    if (!user) {
+    if (!currentUser) {
       setError('Not authenticated.');
       return;
     }
@@ -150,13 +153,14 @@ const ProfileSetup: React.FC = () => {
       return;
     }
 
-    setSaving(true);
+    setSavingStatus('Saving...');
 
     try {
-      let photoURL: string | null = user.photoURL ?? null;
+      let photoURL: string | null = currentUser.photoURL ?? null;
 
-      if (photoFile && user.uid) {
-        const sRef = storageRef(storage, `profiles/${user.uid}/profile`);
+      if (photoFile && currentUser.uid) {
+        setSavingStatus('Uploading photo...');
+        const sRef = storageRef(storage, `profiles/${currentUser.uid}/profile`);
         const arrayBuffer = await photoFile.arrayBuffer();
         await uploadBytes(sRef, new Uint8Array(arrayBuffer));
         photoURL = await getDownloadURL(sRef);
@@ -172,24 +176,34 @@ const ProfileSetup: React.FC = () => {
         : null;
 
       const profileData: Record<string, any> = {
-        uid: user.uid,
+        uid: currentUser.uid,
         name: name.trim(),
         email,
         phone: phone.trim() || null,
         location,
         photoURL,
         updatedAt: new Date(),
+        isProfileComplete: true,
       };
 
-      await setDoc(doc(db, 'users', user.uid), profileData, { merge: true });
+      setSavingStatus('Finalizing...');
+
+      await updateProfile(currentUser, {
+        displayName: name.trim(),
+        photoURL: photoURL
+      });
+
+      await Promise.race([
+        setDoc(doc(db, 'users', currentUser.uid), profileData, { merge: true }),
+        new Promise((resolve) => setTimeout(resolve, 2500))
+      ]);
 
       setSnackOpen(true);
-      setTimeout(() => navigate('/home', { replace: true }), 900);
+      setTimeout(() => navigate('/home', { replace: true }), 500);
     } catch (e) {
-      console.error(e);
-      setError('Failed to save profile. Try again.');
-    } finally {
-      setSaving(false);
+      console.error("Save error:", e);
+      setError('Failed to save profile. Please check connection.');
+      setSavingStatus(null);
     }
   };
 
@@ -255,8 +269,15 @@ const ProfileSetup: React.FC = () => {
 
             <Grid size={{ xs: 12 }}>
               <Box display="flex" gap={2} alignItems="center">
-                <Button variant="contained" onClick={handleSave} disabled={saving}>
-                  {saving ? <CircularProgress size={18} /> : 'Save'}
+                <Button variant="contained" onClick={handleSave} disabled={!!savingStatus}>
+                  {savingStatus ? (
+                    <>
+                      <CircularProgress size={16} sx={{ mr: 1, color: 'inherit' }} />
+                      {savingStatus}
+                    </>
+                  ) : (
+                    'Save'
+                  )}
                 </Button>
 
                 <Button variant="text" onClick={() => navigate('/home')}>

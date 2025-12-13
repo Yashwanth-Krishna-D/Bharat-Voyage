@@ -13,7 +13,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/profile" element={<ProfileSetup />} />  {/* Works now */}
+          <Route path="/profile" element={<ProfileSetup />} />
           <Route path="/home" element={<Home />} />
           <Route path="/plan" element={<Plan />} />
         </Routes>
