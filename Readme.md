@@ -4,8 +4,8 @@ Digital Travel Planning Platform Tailored for India
 ---
 
 ## Project Status  
-Planning and Design Phase  - Done
-Development Phase - Ongoing
+- Planning and Design Phase  - Done
+- Development Phase - Ongoing
 ---
 
 ## Problem Statement  
