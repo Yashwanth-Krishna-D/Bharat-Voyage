@@ -11,9 +11,8 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
-import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { Compass } from 'lucide-react';
+import { auth} from '../firebase';
+import { Plane } from 'lucide-react';
 
 const LoginSection: React.FC = () => {
   const navigate = useNavigate();
@@ -21,25 +20,21 @@ const LoginSection: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const handleNavigation = async (uid: string) => {
     try {
-      const docRef = doc(db, 'users', uid);
-      const docSnap = await Promise.race([
-        getDoc(docRef),
-        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Profile check timed out")), 7000))
-      ]);
-
-      if (docSnap && docSnap.exists() && docSnap.data().isProfileComplete) {
-        navigate('/home', { replace: true });
-      } else {
-        navigate('/profile', { replace: true });
+      const res = await fetch(`${API_URL}/api/users/${uid}`);
+      if (res.ok) {
+        const userData = await res.json();
+        if (userData.isProfileComplete) {
+          navigate('/home', { replace: true });
+          return;
+        }
       }
+      navigate('/profile', { replace: true });
     } catch (e: any) {
-      if (e.message === "Profile check timed out") {
-        console.warn("Profile check timed out - defaulting to Profile Setup. This is normal for slow connections.");
-      } else {
-        console.error("Error checking profile status", e);
-      }
+      console.error("Error checking profile status", e);
       navigate('/profile', { replace: true });
     }
   };
@@ -69,9 +64,17 @@ const LoginSection: React.FC = () => {
       case 'auth/weak-password':
         return 'Password is too weak (min 6 characters).';
       case 'auth/operation-not-allowed':
-        return 'Email/Password sign-in is not enabled for this Firebase project. Enable it in Firebase Console → Authentication → Sign-in method → Email/Password.';
+        return 'Email/Password sign-in is not enabled for this Firebase project.';
       case 'auth/network-request-failed':
         return 'Network error. Check your connection and try again.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'auth/invalid-credential':
+        return 'Invalid email or password.';
+      case 'auth/popup-closed-by-user':
+        return 'Sign-in popup was closed before completing.';
+      case 'auth/cancelled-popup-request':
+        return 'Another sign-in attempt is already in progress.';
       default:
         return 'An unexpected error occurred. Please try again.';
     }
@@ -92,7 +95,6 @@ const LoginSection: React.FC = () => {
       console.error(err);
       const code = err instanceof FirebaseError ? err.code : undefined;
       setError(firebaseCodeToMessage(code));
-    } finally {
       setLoading(false);
     }
   };
@@ -101,8 +103,6 @@ const LoginSection: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    // basic validation
     if (!email) {
       setError('Please enter your email.');
       setLoading(false);
@@ -128,10 +128,15 @@ const LoginSection: React.FC = () => {
     }
 
     try {
-      const uid = isLogin ? (await signInWithEmailAndPassword(auth, email, password)).user.uid : (await createUserWithEmailAndPassword(auth, email, password)).user.uid;
-      if (!isLogin) {
-        if (auth.currentUser && name) {
-          await updateProfile(auth.currentUser, { displayName: name });
+      let uid;
+      if (isLogin) {
+        const uc = await signInWithEmailAndPassword(auth, email, password);
+        uid = uc.user.uid;
+      } else {
+        const uc = await createUserWithEmailAndPassword(auth, email, password);
+        uid = uc.user.uid;
+        if (uc.user && name) {
+          await updateProfile(auth.currentUser!, { displayName: name });
         }
       }
 
@@ -140,9 +145,11 @@ const LoginSection: React.FC = () => {
       console.error('Full login error:', err);
       const code = err instanceof FirebaseError ? err.code : undefined;
       setError(firebaseCodeToMessage(code));
-    } finally {
       setLoading(false);
-      clearSensitive();
+    } finally {
+      if (!loading) {
+        clearSensitive();
+      }
     }
   };
 
@@ -176,7 +183,7 @@ const LoginSection: React.FC = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 px-4">
             <div className="flex items-center gap-2 mb-6">
-              <Compass className="h-10 w-10 text-primary" />
+              <Plane className="h-10 w-10 text-primary" />
               <span className="text-3xl font-bold">Bharath Voyage</span>
             </div>
 
@@ -186,7 +193,7 @@ const LoginSection: React.FC = () => {
               book experiences, and connect with local guides.
             </p>
           </div>
-          
+
           <div className="px-4">
             <div className="bg-card rounded-2xl shadow-2xl p-6">
               <div className="mb-4">

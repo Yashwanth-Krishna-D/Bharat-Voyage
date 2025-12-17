@@ -3,7 +3,6 @@ import {
   Sparkles,
   MapPin,
   X,
-  Plane,
   ChevronRight,
   Camera,
   Mountain,
@@ -12,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import IndiaBg from '../assets/Background-Image.png';
+import Navbar from '../components/Navbar';
 
 interface Region {
   id: string;
@@ -28,7 +28,6 @@ const Home: React.FC = () => {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Subejected to change : temporary static fields
   const regions: Region[] = [
     {
       id: 'punjab',
@@ -115,24 +114,14 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#fff7ed,#fff7e0_40%,#eff6ff)] text-slate-900 font-sans overflow-hidden">
 
-      <nav className="fixed inset-x-0 top-0 z-40 bg-white/95 backdrop-blur-[6px] shadow-[0_4px_12px_rgba(0,0,0,0.06)] h-[72px]">
-        <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center justify-between h-full">
-          <div className="flex items-center gap-2.5">
-            <Plane className="w-8 h-8 text-orange-600" />
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
-              Bharat Voyage
-            </span>
-          </div>
-
-          <div className="flex gap-[18px] items-center">
-            <button
-              className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-[18px] py-2.5 rounded-full font-semibold shadow-[0_8px_28px_rgba(249,115,22,0.18)] hover:-translate-y-0.5 hover:scale-[1.02] transition-transform duration-200 border-none cursor-pointer"
-            >
-              My Account
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar>
+        <button
+          className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-[18px] py-2.5 rounded-full font-semibold shadow-[0_8px_28px_rgba(249,115,22,0.18)] hover:-translate-y-0.5 hover:scale-[1.02] transition-transform duration-200 border-none cursor-pointer"
+          onClick={() => navigate('/account')}
+        >
+          My Account
+        </button>
+      </Navbar>
 
       <main className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-72px)] mt-[72px] w-full overflow-hidden">
 
