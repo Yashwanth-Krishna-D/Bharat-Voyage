@@ -5,3 +5,5 @@
 # Data Base -> Intialised Mongodb : Backend db init
 # Login page -> Altered the Login and Profile storage logic according to DB : Logic Fix
 # Home page -> Setup Accounts page : Feature Enhancement
+# Plan page -> Altered the Plan page logic according to DB : Logic Fix
+# Recommendation -> Generated using AI : AI Integration
