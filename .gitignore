@@ -23,3 +23,5 @@ envfile.txt
 *.njsproj
 *.sln
 *.sw?
+
+*.env
