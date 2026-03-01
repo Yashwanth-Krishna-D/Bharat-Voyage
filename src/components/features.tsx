@@ -30,7 +30,8 @@ export default function Features() {
         <div className="text-center mb-16">
           <h2 className="text-5xl font-bold mb-4 text-balance">Everything You Need for the Perfect Journey</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-            Plan, explore, and experience India like never before with our comprehensive travel companion
+            Plan, Explore, and Experience India 
+            like never before with our comprehensive travel companion
           </p>
         </div>
 
@@ -48,6 +49,13 @@ export default function Features() {
             </div>
           ))}
         </div>
+        
+        <div className="text-center mb-16"> 
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto my-16 text-balance">
+          From bookings to experiences — everything your trip needs, in one place.
+          </p>
+        </div>
+        
       </div>
     </section>
   )

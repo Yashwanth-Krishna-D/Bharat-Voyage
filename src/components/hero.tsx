@@ -1,11 +1,10 @@
 import React from "react"
-import {Compass, Sparkles } from "lucide-react"
+import { Compass, Sparkles } from "lucide-react"
+import Navbar from "./Navbar"
 
 const Hero: React.FC = () => {
   return (
-    // The main section is relative to position children absolutely
     <section className="relative min-h-screen flex flex-col" aria-labelledby="hero-title">
-      {/* Background and overlays remain outside the content flow */}
       <div className="absolute inset-0 -z-10">
         <img
           src="/assets/taj-mahal-at-sunrise-vibrant-colors.jpg"
@@ -13,7 +12,6 @@ const Hero: React.FC = () => {
           className="w-full h-full object-cover brightness-90"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-transparent" />
-        {/* single radial overlay */}
         <div
           className="absolute inset-0"
           style={{
@@ -23,49 +21,37 @@ const Hero: React.FC = () => {
         />
       </div>
 
-      {/* Navbar is now absolutely positioned at the top. 
-        It does not affect the vertical centering of the main content block.
-      */}
-      <nav className="w-full z-20 absolute top-0 left-0 p-6">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-white/10 p-2 backdrop-blur-sm border border-white/10">
-              <Compass className="h-7 w-7 text-white" />
-            </div>
-            <span className="text-white text-2xl font-semibold tracking-tight">Bharat Voyage</span>
-          </div>
+      <Navbar>
+        <div className="hidden md:flex items-center gap-4">
+          <a
+            href="#destinations"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+          >
+            Destinations
+          </a>
 
-          <div className="hidden md:flex items-center gap-4">
-            <a
-              href="#destinations"
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-black backdrop-blur border border-white/10 text-white hover:bg-white/20 transition"
-            >
-              Destinations
-            </a>
+          <a
+            href="#features"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+          >
+            Features
+          </a>
 
-            <a
-              href="#features"
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-black backdrop-blur border border-white/10 text-white hover:bg-white/20 transition"
-            >
-              Features
-            </a>
-
-            <a
-              href="#login"
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-black backdrop-blur border border-white/10 text-white hover:bg-white/20 transition"
-            >
-              Login
-            </a>
-          </div>
-
-          <div className="md:hidden">
-            <button className="p-2 rounded-md bg-black border border-white/10 text-white">Menu</button>
-          </div>
+          <a
+            href="#login"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+          >
+            Login
+          </a>
         </div>
-      </nav>
-      <div className="container mx-auto px-6 flex-1 flex items-center pt-20"> {/* Added pt-20 for nav clearance */}
+
+        <div className="md:hidden">
+          <button className="p-2 rounded-md bg-slate-100 border border-slate-200 text-slate-700">Menu</button>
+        </div>
+      </Navbar>
+
+      <div className="container mx-auto px-6 flex-1 flex items-center pt-20">
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-12">
-          {/* Left Section */}
           <div className="space-y-6 max-w-xl">
             <h1
               id="hero-title"
@@ -82,9 +68,9 @@ const Hero: React.FC = () => {
             </h1>
 
             <p className="text-lg md:text-xl text-white/90">
-                    Discover destinations you never knew you’d love. 
-                    Bharat Voyage curates perfect itineraries, tailored to your style and pace. 
-                    Just tell it how you want to travel — it does the rest.
+              Discover destinations you never knew you’d love.
+              Bharat Voyage curates perfect itineraries, tailored to your style and pace.
+              Just tell it how you want to travel — it does the rest.
             </p>
 
             <div className="mt-4 flex gap-3 text-sm text-white/80">
