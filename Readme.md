@@ -4,9 +4,8 @@ Digital Travel Planning Platform Tailored for India
 ---
 
 ## Project Status  
-Planning and Design Phase  
-Development will begin after finalizing system design.
-
+- Planning and Design Phase  - Done
+- Development Phase - Ongoing
 ---
 
 ## Problem Statement  
@@ -39,12 +38,7 @@ The platform will consist of:
 - A secure backend API for data processing  
 - A database for storing user data and travel plans  
 - Third-party integrations for maps, weather, and attractions  
-
----
-
-## Planned Tech Stack (Tentative)  
-Yet to be finalized  
-
+ 
 ---
 
 ## Planned Core Features  
